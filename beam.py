@@ -65,7 +65,7 @@ label4.place(x=280,y=120)
 load=tk.Entry(gui)
 load.place(x=520,y=120)
 
-# def moment_bracket(F,q,x):
+# def moment_bracket(F,q,x,L):
 
 def check():
     if var.get() == 1:
