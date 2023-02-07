@@ -57,19 +57,60 @@ force.place(x=520,y=60)
 
 label3=tk.Label(gui,text="Localization of force in m from left :")
 label3.place(x=280,y=90)
-force=tk.Entry(gui)
-force.place(x=520,y=90)
+x=tk.Entry(gui)
+x.place(x=520,y=90)
 
 label4=tk.Label(gui,text="Value of evenly distrib. load in kNm :")
 label4.place(x=280,y=120)
 load=tk.Entry(gui)
 load.place(x=520,y=120)
 
-# def moment_bracket(F,q,x,L):
+
+Moment_label=tk.Label(gui,text="Maximum Value of moment: ")
+Moment_label.place(x=280,y=200)
+
+Shearforce_label=tk.Label(gui,text="Maximum Value of shear force: ")
+Shearforce_label.place(x=280,y=220)
+
+def moment_bracket(F,q,x,L):
+    if x>L or x<L:
+        x=0
+    M=q*L*L/2 + F*x
+    Moment_label.config(text="Maximum Value of moment: " +str(M))
+
+def shearforce_bracket(F,q,x,L):
+    if x>L or x<L:
+        F=0
+    V=q*L+F
+    Shearforce_label.config(text="Maximum Value of shear force: " +str(V))
+
 
 def check():
+
+    try:
+        F=int(force.get())
+    except ValueError:
+        F=0
+
+    try:
+        L=int(lenght.get())
+    except ValueError:
+        L=0
+
+    try:
+        X=int(x.get())
+    except ValueError:
+        X=0
+
+    try:
+        q=int(load.get())
+    except ValueError:
+        q=0
+
     if var.get() == 1:
-        print("opcja 1")
+        moment_bracket(F,q,X,L)
+        shearforce_bracket(F,q,X,L)
+
     elif var.get() == 2:
         print("opcja 2")
     elif var.get() == 3:
