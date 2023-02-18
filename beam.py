@@ -40,11 +40,33 @@ ovh_beam.place(x = 10, y = 140)
 ln_beam.create_line(15, 15, 15, 350, width=0.5) #pionowa
 ln_beam.place(x = 260, y = 0)
 
-radio1 = tk.Radiobutton(gui, text="bracket",variable = var, value=1)
+var.set(0)
+test = ['test1', 'test2', 'test3']
+
+def changeState1():
+    if var.get() !=0:
+
+       label5.config(state="disabled")
+       lenght2.config(state="disabled")
+
+def changeState2():
+    if var.get() !=0:
+
+       label5.config(state="disabled")
+       lenght2.config(state="disabled")
+
+
+def changeState3():
+    if var.get() !=0:
+
+       label5.config(state="normal")
+       lenght2.config(state="normal")
+
+radio1 = tk.Radiobutton(gui, text="bracket", command=changeState1, variable = var, value=1)
 radio1.place(x=90, y=40)
-radio2 = tk.Radiobutton(gui, text="simply supported beam", variable = var, value=2)
+radio2 = tk.Radiobutton(gui, text="simply supported beam", command=changeState2, variable = var, value=2)
 radio2.place(x=90, y=98)
-radio3 = tk.Radiobutton(gui, text="beam with overhang", variable = var, value=3)
+radio3 = tk.Radiobutton(gui, text="beam with overhang", command=changeState3, variable = var, value=3)
 radio3.place(x=90, y=156)
 
 label1=tk.Label(gui,text="Lenght of beam/bracket in meters :")
@@ -67,6 +89,12 @@ label4.place(x=280,y=120)
 load=tk.Entry(gui)
 load.place(x=520,y=120)
 
+label5=tk.Label(gui,text="Value of lenght overhang :")
+label5.place(x=280,y=150)
+lenght2=tk.Entry(gui)
+lenght2.place(x=520,y=150)
+
+
 
 Moment_label=tk.Label(gui,text="Maximum Value of moment: ")
 Moment_label.place(x=280,y=200)
@@ -88,6 +116,38 @@ def shearforce_bracket(F,q,x,L):
     V=q*L+F
     Shearforce_label.config(text="Maximum Value of shear force: " +str(V))
 
+def shear_force_fs(F,q,X,L):
+    Rb = (F*X + L*0.5*L*q) / L
+    Ra = (-F*(L-X) - q*L*0.5*L) / L
+
+    print(Ra, Rb)
+    B_Rb = abs(Rb)
+    B_Ra = abs(Ra)
+
+    if B_Rb > B_Ra:
+        Max_Shear_force_fs_ = Rb
+        Min_Shear_force_fs_ = Ra
+        Shearforce_label.config(text="Maximum Value of shear force: " +str(Rb))
+#         print("Max =", Max_Shear_force_fs_)
+#         print("Min =",Min_Shear_force_fs_)
+    else:
+        Max_Shear_force_fs_ = Ra
+        Min_Shear_force_fs_ = Rb
+        Shearforce_label.config(text="Maximum Value of shear force: " +str(Ra))
+#         print("Max =", Max_Shear_force_fs_)
+#         print("Min =",Min_Shear_force_fs_)
+
+def bending_moment_fs(F,q,X,L):
+    Ra = (-F*(L-X) - q*L*0.5*L) / L
+
+    if Ra > 0:
+        M_max = (Ra*X-X*q*X*0.5)
+        Moment_label.config(text="Maximum Value of moment: " +str(M_max))
+    else:
+
+        M_max = (abs(Ra)*X-X*q*X*0.5)
+        M_max = -M_max
+        Moment_label.config(text="Maximum Value of moment: " +str(M_max))
 
 def check():
 
@@ -117,7 +177,8 @@ def check():
         wspornik_wykres(F,q,X,L)
 
     elif var.get() == 2:
-        print("opcja 2")
+        shear_force_fs(F,q,X,L)
+        bending_moment_fs(F,q,X,L)
     elif var.get() == 3:
         print("opcja 3")
 
@@ -170,6 +231,6 @@ def wspornik_wykres(F,q,x,L):
     plt.ylabel("Bending Moment")
     plt.show()
 
-
 button=tk.Button(gui,text="Button",command=check)
 button.place(x=5,y=220)
+
