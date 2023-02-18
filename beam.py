@@ -1,3 +1,5 @@
+import numpy as np
+import matplotlib.pyplot as plt
 import tkinter as tk
 from tkinter import Canvas
 gui = tk.Tk()
@@ -74,13 +76,15 @@ Shearforce_label.place(x=280,y=220)
 
 def moment_bracket(F,q,x,L):
     if x>L or x<L:
+        F=0
         x=0
-    M=q*L*L/2 + F*x
+    M=-q*L*L/2 - F*x
     Moment_label.config(text="Maximum Value of moment: " +str(M))
 
 def shearforce_bracket(F,q,x,L):
-    if x>L or x<L:
+    if x>L or x<0:
         F=0
+        x=0
     V=q*L+F
     Shearforce_label.config(text="Maximum Value of shear force: " +str(V))
 
@@ -93,23 +97,24 @@ def check():
         F=0
 
     try:
-        L=int(lenght.get())
+        L=float(lenght.get())
     except ValueError:
         L=0
 
     try:
-        X=int(x.get())
+        X=float(x.get())
     except ValueError:
         X=0
 
     try:
-        q=int(load.get())
+        q=float(load.get())
     except ValueError:
         q=0
 
     if var.get() == 1:
         moment_bracket(F,q,X,L)
         shearforce_bracket(F,q,X,L)
+        wspornik_wykres(F,q,X,L)
 
     elif var.get() == 2:
         print("opcja 2")
@@ -117,7 +122,53 @@ def check():
         print("opcja 3")
 
 
+def wspornik_wykres(F,q,x,L):
 
+    if x>L or x<0:
+        F=0
+        x=0
+
+    RM=-q*L*L/2 - F*x
+    l = np.linspace(0, L, 1000)
+    X = []
+    SF = []
+    M = []
+
+    # Spróbować zapisać za pomocą list comprehension
+
+    for e in l:
+        R=F+q*L
+        if (e <= x and x != 0) or x == 0 :
+            m =RM+R*e-q*e*e/2
+            sf = R-q*e
+        elif e > x and x != 0:
+            m =RM+R*e-q*e*e/2-F*(e-x)
+            sf = R-q*e-F
+        M.append(m)
+        X.append(e)
+        SF.append(sf)
+
+
+    plt.subplot(1,2,1) # poziomy,piony,index
+    plt.plot(X, SF)
+    plt.plot([0, L], [0, 0],linewidth=5)
+    if x == L:
+        plt.plot( [L, L], [0, F],[0,0],[0,R])
+    elif x != L:
+        plt.plot([0,0],[0,R])
+    plt.title("SFD")
+    plt.xlabel("Length in m")
+    plt.ylabel("Shear Force")
+
+
+    plt.subplot(1,2,2)
+    plt.plot(X, M)
+    plt.plot([0, L], [0, 0],linewidth=5)
+    plt.plot([0,0],[0,RM])
+    plt.title("BMD")
+    plt.xlabel("Length in m")
+    plt.ylabel("Bending Moment")
+    plt.show()
 
 
 button=tk.Button(gui,text="Button",command=check)
