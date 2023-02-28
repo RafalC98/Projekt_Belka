@@ -4,7 +4,7 @@ import tkinter as tk
 from tkinter import Canvas
 gui = tk.Tk()
 gui.geometry("800x500")
-gui.title("Beam Calculator")
+gui.title("RM Beam Calculator")
 var = tk.IntVar()
 
 support = Canvas(gui)
@@ -118,7 +118,8 @@ def shearforce_bracket(F,q,x,L):
 
 def shear_force_fs(F,q,X,L):
     Rb = (F*X + L*0.5*L*q) / L
-    Ra = (-F*(L-X) - q*L*0.5*L) / L
+#     Ra = (-F*(L-X) - q*L*0.5*L) / L       #(!!!! ZWERYFIKOWAC !!!!)
+    Ra = (F*(L-X) + q*L*0.5*L) / L          #(!!!! ZWERYFIKOWAC !!!!)
 
     print(Ra, Rb)
     B_Rb = abs(Rb)
@@ -138,7 +139,8 @@ def shear_force_fs(F,q,X,L):
 #         print("Min =",Min_Shear_force_fs_)
 
 def bending_moment_fs(F,q,X,L):
-    Ra = (-F*(L-X) - q*L*0.5*L) / L
+#     Ra = (-F*(L-X) - q*L*0.5*L) / L       #(!!!! ZWERYFIKOWAC !!!!)
+    Ra = (F*(L-X) + q*L*0.5*L) / L          #(!!!! ZWERYFIKOWAC !!!!)
 
     if Ra > 0:
         M_max = (Ra*X-X*q*X*0.5)
@@ -179,6 +181,7 @@ def check():
     elif var.get() == 2:
         shear_force_fs(F,q,X,L)
         bending_moment_fs(F,q,X,L)
+        fs_wykres(F,q,X,L)
     elif var.get() == 3:
         print("opcja 3")
 
@@ -230,6 +233,56 @@ def wspornik_wykres(F,q,x,L):
     plt.xlabel("Length in m")
     plt.ylabel("Bending Moment")
     plt.show()
+
+def fs_wykres(F,q,x,L):
+
+
+    if x>L or x<0:
+        F=0
+        x=0
+    Rb = (F*x + L*0.5*L*q) / L
+    Ra= (F*(L-x) + q*L*0.5*L) / L
+
+
+    l = np.linspace(0, L, 1000)
+    X = []
+    SF = []
+    M = []
+
+    # Spróbować zapisać za pomocą list comprehension
+
+    for e in l:
+
+        if (e <= x and x != 0) or x == 0 :
+            m =Ra*e-q*e*e/2
+            sf = Ra-q*e
+        elif e > x and x != 0:
+            m =Ra*e-q*e*e/2-F*(e-x)
+            sf = Ra-q*e-F
+        M.append(m)
+        X.append(e)
+        SF.append(sf)
+
+
+    plt.subplot(1,2,1) # poziomy,piony,index
+    plt.plot(X, SF)
+    plt.plot([0, L], [0, 0],linewidth=5)
+
+    plt.plot( [L, L], [0, -Rb],[0,0],[0,Ra])
+
+    plt.title("SFD")
+    plt.xlabel("Length in m")
+    plt.ylabel("Shear Force")
+
+
+    plt.subplot(1,2,2)
+    plt.plot(X, M)
+    plt.plot([0, L], [0, 0],linewidth=5)
+    plt.title("BMD")
+    plt.xlabel("Length in m")
+    plt.ylabel("Bending Moment")
+    plt.show()
+
 
 button=tk.Button(gui,text="Button",command=check)
 button.place(x=5,y=220)
